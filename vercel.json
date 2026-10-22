@@ -1,0 +1,31 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "api-server": {
+      "root": "artifacts/api-server",
+      "framework": "express",
+      "buildCommand": "pnpm run build",
+      "entrypoint": "artifacts/api-server/dist/index.mjs"
+    },
+    "savewise": {
+      "root": "artifacts/savewise",
+      "framework": "vite",
+      "buildCommand": "PORT=5173 BASE_PATH=/ pnpm run build",
+      "outputDirectory": "dist/public"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "api-server"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "savewise"
+      }
+    }
+  ]
+}
