@@ -4,8 +4,7 @@
     "api-server": {
       "root": "artifacts/api-server",
       "framework": "express",
-      "buildCommand": "pnpm run build",
-      "entrypoint": "artifacts/api-server/dist/index.mjs"
+      "buildCommand": "pnpm run build"
     },
     "savewise": {
       "root": "artifacts/savewise",
