@@ -7,6 +7,11 @@
  */
 
 export * from './apiError';
+export * from './authLoginInput';
+export * from './authLogoutInput';
+export * from './authLogoutResponse';
+export * from './authRegistrationInput';
+export * from './authSession';
 export * from './catalogItem';
 export * from './catalogItemCurrency';
 export * from './decision';
@@ -28,6 +33,9 @@ export * from './getRewardsSummaryParams';
 export * from './healthStatus';
 export * from './listDecisionsParams';
 export * from './listSavingsGoalsParams';
+export * from './messageResponse';
+export * from './passwordResetConfirmInput';
+export * from './passwordResetRequestInput';
 export * from './resolveWaitingDecisionParams';
 export * from './rewardsSummary';
 export * from './savingsGoal';

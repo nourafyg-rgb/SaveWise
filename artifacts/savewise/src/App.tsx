@@ -53,6 +53,8 @@ import { getSmartRecommendation } from '@/lib/smart-recommendations';
 import { createSaveWiseRequestId, getSaveWiseSessionId } from '@/lib/session';
 import SmartPicksCard from '@/components/smart-picks-card';
 import WelcomePage from '@/pages/auth/welcome-page';
+import { ForgotPasswordPage, ResetPasswordPage, SignInPage, SignUpPage } from '@/pages/auth/account-pages';
+import { AuthProvider } from '@/lib/auth-context';
 import {
   Route,
   Switch,
@@ -839,8 +841,10 @@ function Router() {
       <Switch>
         <Route path="/" component={WelcomeRoute} />
         <Route path="/decision-studio" component={Home} />
-        <Route path="/sign-in/*?" component={WelcomeRoute} />
-        <Route path="/sign-up/*?" component={WelcomeRoute} />
+        <Route path="/sign-in/*?" component={SignInPage} />
+        <Route path="/sign-up/*?" component={SignUpPage} />
+        <Route path="/forgot-password/*?" component={ForgotPasswordPage} />
+        <Route path="/reset-password/*?" component={ResetPasswordPage} />
         <Route path="/future-fund" component={FutureFund} />
         <Route path="/rewards" component={Rewards} />
         <Route component={NotFound} />
@@ -880,10 +884,12 @@ function App() {
   return (
     <WouterRouter base={appBasePath}>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Router />
-          <Toaster />
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Router />
+            <Toaster />
+          </TooltipProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </WouterRouter>
   );

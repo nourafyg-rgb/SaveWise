@@ -9,6 +9,124 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Get the current account session
+ */
+export const GetAuthSessionResponse = zod.object({
+  "authenticated": zod.boolean(),
+  "userId": zod.string().nullable(),
+  "email": zod.string().nullable()
+})
+
+
+/**
+ * @summary Create an account and link this browser's guest data
+ */
+export const registerAuthAccountBodyEmailMax = 254;
+
+export const registerAuthAccountBodyPasswordMin = 12;
+export const registerAuthAccountBodyPasswordMax = 128;
+
+export const registerAuthAccountBodySessionIdMin = 8;
+export const registerAuthAccountBodySessionIdMax = 80;
+
+
+
+export const RegisterAuthAccountBody = zod.object({
+  "email": zod.string().email().max(registerAuthAccountBodyEmailMax),
+  "password": zod.string().min(registerAuthAccountBodyPasswordMin).max(registerAuthAccountBodyPasswordMax),
+  "sessionId": zod.string().min(registerAuthAccountBodySessionIdMin).max(registerAuthAccountBodySessionIdMax)
+})
+
+export const RegisterAuthAccountResponse = zod.object({
+  "authenticated": zod.boolean(),
+  "userId": zod.string().nullable(),
+  "email": zod.string().nullable()
+})
+
+
+/**
+ * @summary Sign in with email and password
+ */
+export const loginAuthAccountBodyEmailMax = 254;
+
+export const loginAuthAccountBodyPasswordMin = 12;
+export const loginAuthAccountBodyPasswordMax = 128;
+
+
+
+export const LoginAuthAccountBody = zod.object({
+  "email": zod.string().email().max(loginAuthAccountBodyEmailMax),
+  "password": zod.string().min(loginAuthAccountBodyPasswordMin).max(loginAuthAccountBodyPasswordMax)
+})
+
+export const LoginAuthAccountResponse = zod.object({
+  "authenticated": zod.boolean(),
+  "userId": zod.string().nullable(),
+  "email": zod.string().nullable()
+})
+
+
+/**
+ * @summary Sign out and preserve anonymous browser data
+ */
+export const logoutAuthAccountBodySessionIdMin = 8;
+export const logoutAuthAccountBodySessionIdMax = 80;
+
+
+
+export const LogoutAuthAccountBody = zod.object({
+  "sessionId": zod.string().min(logoutAuthAccountBodySessionIdMin).max(logoutAuthAccountBodySessionIdMax)
+})
+
+export const logoutAuthAccountResponseSessionIdMin = 8;
+export const logoutAuthAccountResponseSessionIdMax = 80;
+
+
+
+export const LogoutAuthAccountResponse = zod.object({
+  "message": zod.string(),
+  "sessionId": zod.string().min(logoutAuthAccountResponseSessionIdMin).max(logoutAuthAccountResponseSessionIdMax)
+})
+
+
+/**
+ * @summary Request a password-reset email
+ */
+export const requestPasswordResetBodyEmailMax = 254;
+
+
+
+export const RequestPasswordResetBody = zod.object({
+  "email": zod.string().email().max(requestPasswordResetBodyEmailMax)
+})
+
+export const RequestPasswordResetResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Set a new password using a one-time reset token
+ */
+export const confirmPasswordResetBodyTokenMin = 32;
+export const confirmPasswordResetBodyTokenMax = 128;
+
+export const confirmPasswordResetBodyPasswordMin = 12;
+export const confirmPasswordResetBodyPasswordMax = 128;
+
+
+
+export const ConfirmPasswordResetBody = zod.object({
+  "token": zod.string().min(confirmPasswordResetBodyTokenMin).max(confirmPasswordResetBodyTokenMax),
+  "password": zod.string().min(confirmPasswordResetBodyPasswordMin).max(confirmPasswordResetBodyPasswordMax)
+})
+
+export const ConfirmPasswordResetResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

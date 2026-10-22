@@ -32,6 +32,8 @@ export default function WelcomePage({ onContinueAsGuest }: WelcomePageProps) {
         </Link>
         <div className="sw-header-actions">
           <span className="sw-header-note">A little pause. Your call.</span>
+          <Link className="sw-auth-link" href="/sign-in" data-testid="link-welcome-login">Log in</Link>
+          <Link className="sw-auth-link sw-auth-link-primary" href="/sign-up" data-testid="link-welcome-signup">Sign up</Link>
         </div>
       </header>
 

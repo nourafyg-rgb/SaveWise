@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { ArrowDownRight } from 'lucide-react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
+import { useAuth } from '@/lib/auth-context';
 
 type ActivePage = 'decisions' | 'future-fund' | 'rewards';
 
@@ -15,6 +17,20 @@ interface SiteHeaderProps {
 }
 
 export default function SiteHeader({ activePage, statusLabel }: SiteHeaderProps) {
+  const { session, logout } = useAuth();
+  const [, setLocation] = useLocation();
+  const [logoutError, setLogoutError] = useState('');
+
+  async function handleLogout() {
+    setLogoutError('');
+    try {
+      await logout();
+      setLocation('/');
+    } catch {
+      setLogoutError('Could not sign out. Try again.');
+    }
+  }
+
   return (
     <header className="topbar site-topbar">
       <div className="topbar-inner site-topbar-inner">
@@ -40,7 +56,19 @@ export default function SiteHeader({ activePage, statusLabel }: SiteHeaderProps)
           {statusLabel}
         </span>
         <div className="site-auth-actions">
-          <span className="site-auth-status" data-testid="text-guest-session">Guest session</span>
+          {session?.authenticated ? (
+            <>
+              <span className="site-auth-status" data-testid="text-account-session">{session.email}</span>
+              <button className="site-auth-button" onClick={handleLogout} data-testid="button-logout">Log out</button>
+            </>
+          ) : (
+            <>
+              <span className="site-auth-status" data-testid="text-guest-session">Guest session</span>
+              <Link className="site-auth-link" href="/sign-in" data-testid="link-header-login">Log in</Link>
+              <Link className="site-auth-link site-auth-link-primary" href="/sign-up" data-testid="link-header-signup">Sign up</Link>
+            </>
+          )}
+          {logoutError && <span className="site-auth-error" role="status">{logoutError}</span>}
         </div>
       </div>
     </header>

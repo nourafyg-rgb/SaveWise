@@ -5,6 +5,78 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface AuthSession {
+  authenticated: boolean;
+  /** @nullable */
+  userId: string | null;
+  /** @nullable */
+  email: string | null;
+}
+
+export interface AuthRegistrationInput {
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * @minLength 12
+     * @maxLength 128
+     */
+  password: string;
+  /**
+     * @minLength 8
+     * @maxLength 80
+     */
+  sessionId: string;
+}
+
+export interface AuthLoginInput {
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * @minLength 12
+     * @maxLength 128
+     */
+  password: string;
+}
+
+export interface AuthLogoutInput {
+  /**
+     * @minLength 8
+     * @maxLength 80
+     */
+  sessionId: string;
+}
+
+export interface AuthLogoutResponse {
+  message: string;
+  /**
+     * @minLength 8
+     * @maxLength 80
+     */
+  sessionId: string;
+}
+
+export interface PasswordResetRequestInput {
+  /** @maxLength 254 */
+  email: string;
+}
+
+export interface PasswordResetConfirmInput {
+  /**
+     * @minLength 32
+     * @maxLength 128
+     */
+  token: string;
+  /**
+     * @minLength 12
+     * @maxLength 128
+     */
+  password: string;
+}
+
+export interface MessageResponse {
+  message: string;
+}
+
 export interface HealthStatus {
   status: string;
 }

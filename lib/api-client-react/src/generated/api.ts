@@ -21,6 +21,11 @@ import type {
 
 import type {
   ApiError,
+  AuthLoginInput,
+  AuthLogoutInput,
+  AuthLogoutResponse,
+  AuthRegistrationInput,
+  AuthSession,
   CatalogItem,
   Decision,
   DecisionCompletionInput,
@@ -33,6 +38,9 @@ import type {
   HealthStatus,
   ListDecisionsParams,
   ListSavingsGoalsParams,
+  MessageResponse,
+  PasswordResetConfirmInput,
+  PasswordResetRequestInput,
   ResolveWaitingDecisionParams,
   RewardsSummary,
   SavingsGoal,
@@ -69,6 +77,523 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetAuthSessionUrl = () => {
+
+
+
+
+  return `/api/auth/session`
+}
+
+/**
+ * @summary Get the current account session
+ */
+export const getAuthSession = async ( options?: Parameters<typeof customFetch>[1]): Promise<AuthSession> => {
+
+  return customFetch<AuthSession>(getGetAuthSessionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAuthSessionQueryKey = () => {
+    return [
+    `/api/auth/session`
+    ] as const;
+    }
+
+
+export const getGetAuthSessionQueryOptions = <TData = Awaited<ReturnType<typeof getAuthSession>>, TError = ErrorType<ApiError>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthSessionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthSession>>> = ({ signal }) => getAuthSession({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAuthSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthSession>>>
+export type GetAuthSessionQueryError = ErrorType<ApiError>
+
+
+/**
+ * @summary Get the current account session
+ */
+
+export function useGetAuthSession<TData = Awaited<ReturnType<typeof getAuthSession>>, TError = ErrorType<ApiError>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAuthSessionQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRegisterAuthAccountUrl = () => {
+
+
+
+
+  return `/api/auth/register`
+}
+
+/**
+ * @summary Create an account and link this browser's guest data
+ */
+export const registerAuthAccount = async (authRegistrationInput: AuthRegistrationInput, options?: Parameters<typeof customFetch>[1]): Promise<AuthSession> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AuthSession>(getRegisterAuthAccountUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(authRegistrationInput)
+  }
+);}
+
+
+
+
+
+export const getRegisterAuthAccountMutationKey = () => ['registerAuthAccount'] as const;
+
+export const getRegisterAuthAccountMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerAuthAccount>>, TError,RegisterAuthAccountMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerAuthAccount>>, TError,RegisterAuthAccountMutationVariables, TContext> => {
+
+const mutationKey = getRegisterAuthAccountMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerAuthAccount>>, RegisterAuthAccountMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  registerAuthAccount(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterAuthAccountMutationResult = NonNullable<Awaited<ReturnType<typeof registerAuthAccount>>>
+    export type RegisterAuthAccountMutationBody = BodyType<AuthRegistrationInput>
+    export type RegisterAuthAccountMutationError = ErrorType<void>
+    export type RegisterAuthAccountMutationVariables = {data: BodyType<AuthRegistrationInput>}
+
+    /**
+ * @summary Create an account and link this browser's guest data
+ */
+export const useRegisterAuthAccount = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerAuthAccount>>, TError,RegisterAuthAccountMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof registerAuthAccount>>,
+        TError,
+        RegisterAuthAccountMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRegisterAuthAccountMutationOptions(options));
+    }
+
+export const getLoginAuthAccountUrl = () => {
+
+
+
+
+  return `/api/auth/login`
+}
+
+/**
+ * @summary Sign in with email and password
+ */
+export const loginAuthAccount = async (authLoginInput: AuthLoginInput, options?: Parameters<typeof customFetch>[1]): Promise<AuthSession> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AuthSession>(getLoginAuthAccountUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(authLoginInput)
+  }
+);}
+
+
+
+
+
+export const getLoginAuthAccountMutationKey = () => ['loginAuthAccount'] as const;
+
+export const getLoginAuthAccountMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthAccount>>, TError,LoginAuthAccountMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof loginAuthAccount>>, TError,LoginAuthAccountMutationVariables, TContext> => {
+
+const mutationKey = getLoginAuthAccountMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginAuthAccount>>, LoginAuthAccountMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  loginAuthAccount(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LoginAuthAccountMutationResult = NonNullable<Awaited<ReturnType<typeof loginAuthAccount>>>
+    export type LoginAuthAccountMutationBody = BodyType<AuthLoginInput>
+    export type LoginAuthAccountMutationError = ErrorType<void>
+    export type LoginAuthAccountMutationVariables = {data: BodyType<AuthLoginInput>}
+
+    /**
+ * @summary Sign in with email and password
+ */
+export const useLoginAuthAccount = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthAccount>>, TError,LoginAuthAccountMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof loginAuthAccount>>,
+        TError,
+        LoginAuthAccountMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLoginAuthAccountMutationOptions(options));
+    }
+
+export const getLogoutAuthAccountUrl = () => {
+
+
+
+
+  return `/api/auth/logout`
+}
+
+/**
+ * @summary Sign out and preserve anonymous browser data
+ */
+export const logoutAuthAccount = async (authLogoutInput: AuthLogoutInput, options?: Parameters<typeof customFetch>[1]): Promise<AuthLogoutResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AuthLogoutResponse>(getLogoutAuthAccountUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(authLogoutInput)
+  }
+);}
+
+
+
+
+
+export const getLogoutAuthAccountMutationKey = () => ['logoutAuthAccount'] as const;
+
+export const getLogoutAuthAccountMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAuthAccount>>, TError,LogoutAuthAccountMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logoutAuthAccount>>, TError,LogoutAuthAccountMutationVariables, TContext> => {
+
+const mutationKey = getLogoutAuthAccountMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutAuthAccount>>, LogoutAuthAccountMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  logoutAuthAccount(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutAuthAccountMutationResult = NonNullable<Awaited<ReturnType<typeof logoutAuthAccount>>>
+    export type LogoutAuthAccountMutationBody = BodyType<AuthLogoutInput>
+    export type LogoutAuthAccountMutationError = ErrorType<void>
+    export type LogoutAuthAccountMutationVariables = {data: BodyType<AuthLogoutInput>}
+
+    /**
+ * @summary Sign out and preserve anonymous browser data
+ */
+export const useLogoutAuthAccount = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAuthAccount>>, TError,LogoutAuthAccountMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof logoutAuthAccount>>,
+        TError,
+        LogoutAuthAccountMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLogoutAuthAccountMutationOptions(options));
+    }
+
+export const getRequestPasswordResetUrl = () => {
+
+
+
+
+  return `/api/auth/password-reset/request`
+}
+
+/**
+ * @summary Request a password-reset email
+ */
+export const requestPasswordReset = async (passwordResetRequestInput: PasswordResetRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<MessageResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<MessageResponse>(getRequestPasswordResetUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(passwordResetRequestInput)
+  }
+);}
+
+
+
+
+
+export const getRequestPasswordResetMutationKey = () => ['requestPasswordReset'] as const;
+
+export const getRequestPasswordResetMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestPasswordReset>>, TError,RequestPasswordResetMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestPasswordReset>>, TError,RequestPasswordResetMutationVariables, TContext> => {
+
+const mutationKey = getRequestPasswordResetMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestPasswordReset>>, RequestPasswordResetMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestPasswordReset(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestPasswordResetMutationResult = NonNullable<Awaited<ReturnType<typeof requestPasswordReset>>>
+    export type RequestPasswordResetMutationBody = BodyType<PasswordResetRequestInput>
+    export type RequestPasswordResetMutationError = ErrorType<void>
+    export type RequestPasswordResetMutationVariables = {data: BodyType<PasswordResetRequestInput>}
+
+    /**
+ * @summary Request a password-reset email
+ */
+export const useRequestPasswordReset = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestPasswordReset>>, TError,RequestPasswordResetMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestPasswordReset>>,
+        TError,
+        RequestPasswordResetMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestPasswordResetMutationOptions(options));
+    }
+
+export const getConfirmPasswordResetUrl = () => {
+
+
+
+
+  return `/api/auth/password-reset/confirm`
+}
+
+/**
+ * @summary Set a new password using a one-time reset token
+ */
+export const confirmPasswordReset = async (passwordResetConfirmInput: PasswordResetConfirmInput, options?: Parameters<typeof customFetch>[1]): Promise<MessageResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<MessageResponse>(getConfirmPasswordResetUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(passwordResetConfirmInput)
+  }
+);}
+
+
+
+
+
+export const getConfirmPasswordResetMutationKey = () => ['confirmPasswordReset'] as const;
+
+export const getConfirmPasswordResetMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmPasswordReset>>, TError,ConfirmPasswordResetMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmPasswordReset>>, TError,ConfirmPasswordResetMutationVariables, TContext> => {
+
+const mutationKey = getConfirmPasswordResetMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmPasswordReset>>, ConfirmPasswordResetMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  confirmPasswordReset(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmPasswordResetMutationResult = NonNullable<Awaited<ReturnType<typeof confirmPasswordReset>>>
+    export type ConfirmPasswordResetMutationBody = BodyType<PasswordResetConfirmInput>
+    export type ConfirmPasswordResetMutationError = ErrorType<void>
+    export type ConfirmPasswordResetMutationVariables = {data: BodyType<PasswordResetConfirmInput>}
+
+    /**
+ * @summary Set a new password using a one-time reset token
+ */
+export const useConfirmPasswordReset = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmPasswordReset>>, TError,ConfirmPasswordResetMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof confirmPasswordReset>>,
+        TError,
+        ConfirmPasswordResetMutationVariables,
+        TContext
+      > => {
+      return useMutation(getConfirmPasswordResetMutationOptions(options));
+    }
 
 export const getHealthCheckUrl = () => {
 

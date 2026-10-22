@@ -17,3 +17,7 @@ export function getSaveWiseSessionId(): string {
   window.localStorage.setItem(SESSION_KEY, created);
   return created;
 }
+
+export function setSaveWiseSessionId(sessionId: string): void {
+  window.localStorage.setItem(SESSION_KEY, sessionId);
+}

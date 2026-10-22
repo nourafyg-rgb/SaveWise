@@ -10,11 +10,143 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: SaveWise email and password accounts
   - name: savewise
     description: SaveWise decision flow and Future Fund simulation
   - name: rewards
     description: SaveWise points, streaks, savings totals, and goals
 paths:
+  /auth/session:
+    get:
+      operationId: getAuthSession
+      tags: [auth]
+      summary: Get the current account session
+      responses:
+        "200":
+          description: Current account or guest session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "503":
+          description: Account session is temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /auth/register:
+    post:
+      operationId: registerAuthAccount
+      tags: [auth]
+      summary: Create an account and link this browser's guest data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRegistrationInput"
+      responses:
+        "201":
+          description: Account created and signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          description: Invalid registration details
+        "409":
+          description: An account already exists for this email
+        "429":
+          description: Too many registration attempts
+  /auth/login:
+    post:
+      operationId: loginAuthAccount
+      tags: [auth]
+      summary: Sign in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLoginInput"
+      responses:
+        "200":
+          description: Signed-in account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          description: Invalid sign-in details
+        "401":
+          description: Email or password is incorrect
+        "429":
+          description: Too many sign-in attempts
+  /auth/logout:
+    post:
+      operationId: logoutAuthAccount
+      tags: [auth]
+      summary: Sign out and preserve anonymous browser data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLogoutInput"
+      responses:
+        "200":
+          description: Signed out with a fresh guest session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthLogoutResponse"
+        "401":
+          description: No account session is active
+  /auth/password-reset/request:
+    post:
+      operationId: requestPasswordReset
+      tags: [auth]
+      summary: Request a password-reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequestInput"
+      responses:
+        "202":
+          description: Generic response to prevent email enumeration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Invalid email address
+        "429":
+          description: Too many reset requests
+        "503":
+          description: Password-reset email is not configured or could not be sent
+  /auth/password-reset/confirm:
+    post:
+      operationId: confirmPasswordReset
+      tags: [auth]
+      summary: Set a new password using a one-time reset token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetConfirmInput"
+      responses:
+        "200":
+          description: Password changed and prior sessions revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Invalid or expired reset token or password
   /healthz:
     get:
       operationId: healthCheck
@@ -486,6 +618,88 @@ paths:
                 $ref: "#/components/schemas/ApiError"
 components:
   schemas:
+    AuthSession:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+        userId:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+      required: [authenticated, userId, email]
+    AuthRegistrationInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 12
+          maxLength: 128
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 80
+      required: [email, password, sessionId]
+    AuthLoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 12
+          maxLength: 128
+      required: [email, password]
+    AuthLogoutInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 80
+      required: [sessionId]
+    AuthLogoutResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 80
+      required: [message, sessionId]
+    PasswordResetRequestInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      required: [email]
+    PasswordResetConfirmInput:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 32
+          maxLength: 128
+        password:
+          type: string
+          minLength: 12
+          maxLength: 128
+      required: [token, password]
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
     HealthStatus:
       type: object
       properties:

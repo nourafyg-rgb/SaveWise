@@ -1,3 +1,306 @@
+/* Account pages use SaveWise's cool sky-blue and navy palette. */
+.sw-account-page {
+  min-height: 100vh;
+  padding: 24px clamp(18px, 4vw, 56px) 34px;
+  color: #102d4d;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.9), transparent 34rem),
+    linear-gradient(145deg, #dff1ff 0%, #edf7ff 48%, #d7eaff 100%);
+}
+
+.sw-account-header {
+  width: min(100%, 1160px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sw-account-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #345675;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.sw-account-back:hover,
+.sw-account-inline-link a:hover,
+.sw-account-switch a:hover {
+  color: #0b3c70;
+  text-decoration: underline;
+}
+
+.sw-account-card {
+  width: min(100%, 450px);
+  margin: clamp(32px, 7vh, 74px) auto 0;
+  padding: clamp(26px, 5vw, 42px);
+  border: 1px solid rgba(18, 61, 101, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 24px 70px rgba(18, 61, 101, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.sw-account-icon {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #fff;
+  background: #173e68;
+}
+
+.sw-account-eyebrow {
+  color: #4d6d8b;
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.sw-account-card h1 {
+  margin: 8px 0 0;
+  color: #102d4d;
+  font-size: clamp(1.8rem, 5vw, 2.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.sw-account-intro {
+  margin: 12px 0 24px;
+  color: #536b84;
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+
+.sw-account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sw-account-form label {
+  margin-top: 6px;
+  color: #1b3e60;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.sw-account-form input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #c8d8e7;
+  border-radius: 12px;
+  outline: 0;
+  color: #102d4d;
+  background: #fbfdff;
+  font: inherit;
+  font-size: 0.95rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.sw-account-form input:focus {
+  border-color: #3b79ad;
+  box-shadow: 0 0 0 3px rgba(59, 121, 173, 0.16);
+}
+
+.sw-account-hint {
+  margin-top: -4px;
+  color: #687e93;
+  font-size: 0.76rem;
+}
+
+.sw-account-inline-link {
+  margin: 2px 0 4px;
+  text-align: right;
+  font-size: 0.82rem;
+}
+
+.sw-account-inline-link a,
+.sw-account-switch a {
+  color: #1d5e95;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sw-account-submit {
+  min-height: 49px;
+  margin-top: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 13px;
+  color: #fff;
+  background: #163d66;
+  box-shadow: 0 8px 18px rgba(22, 61, 102, 0.18);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.93rem;
+  font-weight: 750;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.sw-account-submit:hover:not(:disabled) {
+  background: #0d3156;
+  transform: translateY(-1px);
+}
+
+.sw-account-submit:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.sw-account-feedback {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.sw-account-feedback.is-error {
+  color: #8a2e36;
+  background: #fff0f1;
+}
+
+.sw-account-feedback.is-success {
+  color: #235f4c;
+  background: #e8f6ef;
+}
+
+.sw-account-switch {
+  margin: 20px 0 0;
+  color: #63798e;
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+.sw-account-footnote {
+  max-width: 440px;
+  margin: 20px auto 0;
+  color: #607992;
+  font-size: 0.77rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.sw-spin {
+  animation: sw-account-spin 850ms linear infinite;
+}
+
+@keyframes sw-account-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sw-welcome-header .sw-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sw-auth-link {
+  color: #173e68;
+  font-size: 0.88rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.sw-auth-link:hover {
+  color: #286da2;
+}
+
+.sw-auth-link-primary {
+  padding: 9px 15px;
+  border: 1px solid rgba(20, 61, 100, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.site-auth-actions {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.site-auth-status {
+  max-width: 180px;
+  overflow: hidden;
+  color: #39566f;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-auth-link,
+.site-auth-button {
+  border: 0;
+  color: #173e68;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.site-auth-link-primary {
+  padding: 7px 10px;
+  border: 1px solid rgba(20, 61, 100, 0.18);
+  border-radius: 9px;
+  background: #f1f7fd;
+}
+
+.site-auth-button:hover,
+.site-auth-link:hover {
+  color: #2872ab;
+}
+
+.site-auth-error {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 5;
+  color: #8a2e36;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 640px) {
+  .sw-account-page {
+    padding-top: 18px;
+  }
+
+  .sw-account-card {
+    margin-top: 36px;
+    border-radius: 19px;
+  }
+
+  .sw-welcome-header .sw-header-note {
+    display: none;
+  }
+
+  .sw-welcome-header .sw-header-actions {
+    gap: 9px;
+  }
+
+  .site-auth-status {
+    max-width: 88px;
+  }
+
+  .site-auth-actions {
+    gap: 5px;
+  }
+}
 .sw-auth-page {
   --sw-cream: #eaf5fb;
   --sw-paper: #f7fbfe;
