@@ -48,18 +48,13 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { ConfirmationModal } from '@/components/confirmation-modal';
-import { ClerkProvider, SignIn, SignUp, useAuth, useClerk } from '@clerk/react';
-import { publishableKeyFromHost } from '@clerk/react/internal';
-import { shadcn } from '@clerk/themes';
 import { getSaveWisePick } from '@/lib/savewise-pick';
 import { getSmartRecommendation } from '@/lib/smart-recommendations';
 import { createSaveWiseRequestId, getSaveWiseSessionId } from '@/lib/session';
 import SmartPicksCard from '@/components/smart-picks-card';
-import AuthPageFrame from '@/pages/auth/auth-page-frame';
 import WelcomePage from '@/pages/auth/welcome-page';
 import {
   Route,
-  Redirect,
   Switch,
   Link,
   useLocation,
@@ -67,73 +62,7 @@ import {
 } from 'wouter';
 
 const queryClient = new QueryClient();
-const assetBasePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-const appBasePath = `${assetBasePath}/SaveWise`;
-const clerkPubKey = publishableKeyFromHost(
-  window.location.hostname,
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
-);
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
-
-if (!clerkPubKey) {
-  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in the app environment.');
-}
-
-function stripBase(path: string): string {
-  if (path === appBasePath) return '/';
-  return path.startsWith(`${appBasePath}/`)
-    ? path.slice(appBasePath.length)
-    : path;
-}
-
-const clerkAppearance = {
-  theme: shadcn,
-  cssLayerName: 'clerk',
-  options: {
-    logoPlacement: 'inside' as const,
-    logoLinkUrl: appBasePath,
-    logoImageUrl: `${window.location.origin}${assetBasePath}/logo.svg`,
-  },
-  variables: {
-    colorPrimary: '#123c64',
-    colorForeground: '#102b49',
-    colorMutedForeground: '#526d82',
-    colorDanger: '#a43f40',
-    colorBackground: '#f7fbfe',
-    colorInput: '#f7fbfe',
-    colorInputForeground: '#102b49',
-    colorNeutral: '#c8dce8',
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
-    borderRadius: '0.6rem',
-  },
-  elements: {
-    rootBox: 'w-full flex justify-center',
-    cardBox: 'bg-[#f7fbfe] rounded-xl w-full max-w-[440px] overflow-hidden border-0 shadow-none',
-    card: '!shadow-none !border-0 !bg-transparent !rounded-none',
-    footer: '!shadow-none !border-0 !bg-transparent !rounded-none',
-    headerTitle: 'text-[#102b49] font-bold',
-    headerSubtitle: 'text-[#526d82]',
-    socialButtonsBlockButtonText: 'text-[#102b49] font-semibold',
-    formFieldLabel: 'text-[#102b49] font-semibold',
-    footerActionLink: 'text-[#087eae] font-semibold',
-    footerActionText: 'text-[#526d82]',
-    dividerText: 'text-[#526d82]',
-    identityPreviewEditButton: 'text-[#087eae] font-semibold',
-    formFieldSuccessText: 'text-[#2f7857]',
-    alertText: 'text-[#a43f40]',
-    logoBox: 'rounded-lg',
-    logoImage: 'rounded-lg',
-    socialButtonsBlockButton: 'border-[#c8dce8] bg-[#f7fbfe] hover:bg-[#eaf5fb]',
-    formButtonPrimary: 'bg-[#123c64] text-white hover:bg-[#0b507b]',
-    formFieldInput: 'border-[#c8dce8] bg-[#ffffff] text-[#102b49]',
-    footerAction: 'text-[#526d82]',
-    dividerLine: 'bg-[#c8dce8]',
-    alert: 'border-[#c8dce8] bg-[#eaf5fb]',
-    otpCodeFieldInput: 'border-[#c8dce8] bg-[#ffffff] text-[#102b49]',
-    formFieldRow: 'text-[#102b49]',
-    main: 'text-[#102b49]',
-  },
-};
+const appBasePath = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/SaveWise`;
 
 type DecisionModalActionState =
   | { kind: 'decision'; decision: DecisionDecision; item: CatalogItem; requestId: string }
@@ -908,10 +837,10 @@ function Router() {
     // survives a page crash.
     <RoutedErrorBoundary>
       <Switch>
-        <Route path="/" component={HomeRedirect} />
+        <Route path="/" component={WelcomeRoute} />
         <Route path="/decision-studio" component={Home} />
-        <Route path="/sign-in/*?" component={SignInPage} />
-        <Route path="/sign-up/*?" component={SignUpPage} />
+        <Route path="/sign-in/*?" component={WelcomeRoute} />
+        <Route path="/sign-up/*?" component={WelcomeRoute} />
         <Route path="/future-fund" component={FutureFund} />
         <Route path="/rewards" component={Rewards} />
         <Route component={NotFound} />
@@ -925,134 +854,9 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
   return <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>;
 }
 
-function AuthPageLoading() {
-  return (
-    <main className="sw-auth-page sw-auth-frame" aria-busy="true">
-      <div className="sw-auth-content" role="status" data-testid="status-auth-loading">
-        Checking your SaveWise session…
-      </div>
-    </main>
-  );
-}
-
-function HomeRedirect() {
-  const { isLoaded, isSignedIn } = useAuth();
+function WelcomeRoute() {
   const [, setLocation] = useLocation();
-
-  if (!isLoaded) return <AuthPageLoading />;
-  if (isSignedIn) return <Redirect to="/decision-studio" />;
-
-  return (
-    <WelcomePage
-      onSignUp={() => setLocation('/sign-up')}
-      onSignIn={() => setLocation('/sign-in')}
-      onContinueAsGuest={() => setLocation('/decision-studio')}
-    />
-  );
-}
-
-function SignInPage() {
-  const { isLoaded, isSignedIn } = useAuth();
-
-  if (!isLoaded) return <AuthPageLoading />;
-  if (isSignedIn) return <Redirect to="/decision-studio" />;
-
-  return (
-    <AuthPageFrame
-      title="Welcome back"
-      description="Sign in to pick up your SaveWise account."
-      alternateHref="/sign-up"
-      alternateLabel="Create an account"
-    >
-      <SignIn
-        routing="path"
-        path={`${appBasePath}/sign-in`}
-        signUpUrl={`${appBasePath}/sign-up`}
-      />
-    </AuthPageFrame>
-  );
-}
-
-function SignUpPage() {
-  const { isLoaded, isSignedIn } = useAuth();
-
-  if (!isLoaded) return <AuthPageLoading />;
-  if (isSignedIn) return <Redirect to="/decision-studio" />;
-
-  return (
-    <AuthPageFrame
-      title="Make it yours"
-      description="Create an account for a clearer, more personal saving space."
-      alternateHref="/sign-in"
-      alternateLabel="Sign in"
-    >
-      <SignUp
-        routing="path"
-        path={`${appBasePath}/sign-up`}
-        signInUrl={`${appBasePath}/sign-in`}
-      />
-    </AuthPageFrame>
-  );
-}
-
-function ClerkQueryClientCacheInvalidator() {
-  const { addListener } = useClerk();
-  const currentQueryClient = useQueryClient();
-  const previousUserId = useRef<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    const unsubscribe = addListener(({ user }) => {
-      const userId = user?.id ?? null;
-      if (
-        previousUserId.current !== undefined &&
-        previousUserId.current !== userId
-      ) {
-        currentQueryClient.clear();
-      }
-      previousUserId.current = userId;
-    });
-    return unsubscribe;
-  }, [addListener, currentQueryClient]);
-
-  return null;
-}
-
-function ClerkRouter() {
-  const [, setLocation] = useLocation();
-
-  return (
-    <ClerkProvider
-      publishableKey={clerkPubKey}
-      proxyUrl={clerkProxyUrl}
-      appearance={clerkAppearance}
-      signInUrl={`${appBasePath}/sign-in`}
-      signUpUrl={`${appBasePath}/sign-up`}
-      localization={{
-        signIn: {
-          start: {
-            title: 'Welcome back',
-            subtitle: 'Sign in to your SaveWise space',
-          },
-        },
-        signUp: {
-          start: {
-            title: 'Create your account',
-            subtitle: 'Make a little room for what matters',
-          },
-        },
-      }}
-      routerPush={(to) => setLocation(stripBase(to))}
-      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
-    >
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <ClerkQueryClientCacheInvalidator />
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ClerkProvider>
-  );
+  return <WelcomePage onContinueAsGuest={() => setLocation('/decision-studio')} />;
 }
 
 function App() {
@@ -1075,7 +879,12 @@ function App() {
 
   return (
     <WouterRouter base={appBasePath}>
-      <ClerkRouter />
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Router />
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
     </WouterRouter>
   );
 }

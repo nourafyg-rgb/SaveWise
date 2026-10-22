@@ -4,8 +4,6 @@ import SaveWiseModel from './savewise-model';
 import './auth-pages.css';
 
 type WelcomePageProps = {
-  onSignUp: () => void;
-  onSignIn: () => void;
   onContinueAsGuest: () => void;
 };
 
@@ -23,7 +21,7 @@ function FutureFundIllustration() {
   );
 }
 
-export default function WelcomePage({ onSignUp, onSignIn, onContinueAsGuest }: WelcomePageProps) {
+export default function WelcomePage({ onContinueAsGuest }: WelcomePageProps) {
   return (
     <main className="sw-auth-page sw-welcome-page">
       <div className="sw-auth-grain" aria-hidden="true" />
@@ -34,7 +32,6 @@ export default function WelcomePage({ onSignUp, onSignIn, onContinueAsGuest }: W
         </Link>
         <div className="sw-header-actions">
           <span className="sw-header-note">A little pause. Your call.</span>
-          <button className="sw-signin-link" onClick={onSignIn} data-testid="button-welcome-sign-in">Sign in <ArrowRight size={15} /></button>
         </div>
       </header>
 
@@ -46,11 +43,8 @@ export default function WelcomePage({ onSignUp, onSignIn, onContinueAsGuest }: W
             Take a breath before you buy. Compare options, make a choice, and save toward something that matters to you.
           </p>
           <div className="sw-hero-actions">
-            <button className="sw-button-primary" onClick={onSignUp} data-testid="button-welcome-sign-up">
-              Make your free account <ArrowRight size={17} />
-            </button>
-            <button className="sw-button-quiet" onClick={onContinueAsGuest} data-testid="button-continue-as-guest">
-              Try it as a guest <span>→</span>
+            <button className="sw-button-primary" onClick={onContinueAsGuest} data-testid="button-continue-as-guest">
+              Continue as Guest <ArrowRight size={17} />
             </button>
           </div>
           <div className="sw-privacy-line"><ShieldCheck size={16} /> Virtual-only tracking. No checkout or money transfers.</div>
@@ -91,8 +85,7 @@ export default function WelcomePage({ onSignUp, onSignIn, onContinueAsGuest }: W
           <h2 data-testid="text-bottom-cta">A good money habit<br />can start <em>right now.</em></h2>
         </div>
         <div className="sw-bottom-actions">
-          <button className="sw-button-primary" onClick={onSignUp} data-testid="button-bottom-sign-up">Get started <ArrowRight size={17} /></button>
-          <button className="sw-bottom-signin" onClick={onSignIn} data-testid="button-bottom-sign-in">Already have an account? Sign in</button>
+          <button className="sw-button-primary" onClick={onContinueAsGuest} data-testid="button-bottom-continue-as-guest">Continue as Guest <ArrowRight size={17} /></button>
         </div>
       </section>
 

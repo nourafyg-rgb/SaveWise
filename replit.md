@@ -36,7 +36,7 @@ The workspace includes a PostgreSQL/Drizzle package for other artifacts; SaveWis
 - The app is a new artifact; do not modify or reuse an earlier SaveWise project.
 - Approved scope includes Phase 4, “Before I Click,” and Phase 5, “Skip It → Grow It.” Do not add Phase 6 or later features without approval.
 - Product prices, alternatives, discounts, promo codes, and cashback are sample data, not live Kuwait offers.
-- Decisions are associated with a random browser session ID until a later approved authentication phase.
+- SaveWise is guest-only: decisions and tracking data use a random browser session ID stored in the browser, not an account.
 - Skip decisions prepare 10% of the listed price. A separate explicit action can add that amount to the virtual Future Fund simulation.
 - Future Fund projections use a fixed 5% annual compound-return assumption, are illustrative only, and never move or invest real money.
 

@@ -1,6 +1,5 @@
 import { ArrowDownRight } from 'lucide-react';
 import { Link } from 'wouter';
-import { useAuth, useClerk, useUser } from '@clerk/react';
 
 type ActivePage = 'decisions' | 'future-fund' | 'rewards';
 
@@ -16,12 +15,6 @@ interface SiteHeaderProps {
 }
 
 export default function SiteHeader({ activePage, statusLabel }: SiteHeaderProps) {
-  const { isLoaded, isSignedIn } = useAuth();
-  const { signOut } = useClerk();
-  const { user } = useUser();
-  const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-  const displayName = user?.firstName?.trim() || user?.username?.trim() || 'Account';
-
   return (
     <header className="topbar site-topbar">
       <div className="topbar-inner site-topbar-inner">
@@ -46,29 +39,9 @@ export default function SiteHeader({ activePage, statusLabel }: SiteHeaderProps)
           <span className="demo-dot" aria-hidden="true" />
           {statusLabel}
         </span>
-        {isLoaded && (
-          <div className="site-auth-actions">
-            {isSignedIn ? (
-              <>
-                <span className="site-auth-status" data-testid="text-account-name">{displayName}</span>
-                <button
-                  type="button"
-                  className="site-auth-link site-auth-logout"
-                  onClick={() => void signOut({ redirectUrl: basePath || '/' })}
-                  data-testid="button-logout"
-                >
-                  Log out
-                </button>
-              </>
-            ) : (
-              <>
-                <span className="site-auth-status" data-testid="text-guest-session">Guest session</span>
-                <Link className="site-auth-link" href="/sign-in" data-testid="link-login">Log in</Link>
-                <Link className="site-auth-link site-auth-primary" href="/sign-up" data-testid="link-sign-up">Sign up</Link>
-              </>
-            )}
-          </div>
-        )}
+        <div className="site-auth-actions">
+          <span className="site-auth-status" data-testid="text-guest-session">Guest session</span>
+        </div>
       </div>
     </header>
   );
