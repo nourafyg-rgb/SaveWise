@@ -1,0 +1,3 @@
+- [Orval Zod export collisions](orval-zod-export-collisions.md) — path-parameter schemas and generated types can collide in the Zod barrel; keep its exports selective after codegen.
+- [Post-delegation verification](post-delegation-verification.md) — after delegated UI integration, recheck unrelated backend changes and verify them against the running API.
+- [Required query session validation](required-query-session-validation.md) — check raw required query strings before generated Zod coercion, which can turn a missing value into `"undefined"`.

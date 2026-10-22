@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "SaveWise"
+description = "A before-you-buy savings decision tool that helps people compare demo offers, pause purchases, and record skipped spending. This first phase implements the item decision flow only."
+version = "1.0.0"
+id = "artifacts/savewise"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22687
+
+[services.development]
+run = "pnpm --filter @workspace/savewise run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/savewise", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/savewise/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22687"
+BASE_PATH = "/"

@@ -1,0 +1,839 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: savewise
+    description: SaveWise decision flow and Future Fund simulation
+  - name: rewards
+    description: SaveWise points, streaks, savings totals, and goals
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /catalog/items:
+    get:
+      operationId: searchCatalogItems
+      tags: [savewise]
+      summary: Search the clearly labeled demo product catalog
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        "200":
+          description: Matching demo items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CatalogItem"
+  /decisions:
+    get:
+      operationId: listDecisions
+      tags: [savewise]
+      summary: List this browser's saved purchase decisions
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 80
+      responses:
+        "200":
+          description: Recent decisions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Decision"
+    post:
+      operationId: createDecision
+      tags: [savewise]
+      summary: Record a buy, wait, or skip choice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DecisionInput"
+      responses:
+        "200":
+          description: Idempotent request replay; the saved decision was not duplicated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Decision"
+        "201":
+          description: Decision saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Decision"
+        "400":
+          description: Invalid decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Demo item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /decisions/{id}/complete:
+    post:
+      operationId: resolveWaitingDecision
+      tags: [savewise]
+      summary: Revisit an elapsed waiting decision
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 80
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DecisionCompletionInput"
+      responses:
+        "200":
+          description: Waiting decision updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Decision"
+        "400":
+          description: Invalid completion choice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Decision not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Waiting period has not elapsed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /future-fund:
+    get:
+      operationId: getFutureFundSummary
+      tags: [savewise]
+      summary: Get this browser's simulated Future Fund
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 80
+      responses:
+        "200":
+          description: Simulated fund contributions and compound-growth estimates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FutureFundSummary"
+        "503":
+          description: Fund history is temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /future-fund/invest:
+    post:
+      operationId: simulateFutureFundInvestment
+      tags: [savewise]
+      summary: Approve one prepared contribution into the simulated fund
+      description: Records a virtual contribution only. It never moves real money or creates an investment transaction.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FutureFundInvestmentInput"
+      responses:
+        "200":
+          description: Contribution was already added; the current simulation is returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FutureFundSummary"
+        "201":
+          description: Contribution added to the simulated Future Fund
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FutureFundSummary"
+        "400":
+          description: Invalid investment simulation request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Skipped decision not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Decision is not eligible for this simulation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Fund update is temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /rewards:
+    get:
+      operationId: getRewardsSummary
+      tags: [rewards]
+      summary: Get this browser's rewards and savings summary
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 80
+        - name: timeZone
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      responses:
+        "200":
+          description: Points, streaks, and totals derived from saved decisions and goals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardsSummary"
+        "400":
+          description: Invalid session or time zone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Rewards summary is temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /goals:
+    get:
+      operationId: listSavingsGoals
+      tags: [rewards]
+      summary: List this browser's active savings goals
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 80
+      responses:
+        "200":
+          description: Active savings goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavingsGoal"
+        "400":
+          description: Invalid session identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Savings goals are temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    post:
+      operationId: createSavingsGoal
+      tags: [rewards]
+      summary: Create a savings goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingsGoalInput"
+      responses:
+        "200":
+          description: This idempotent request already created the goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+        "201":
+          description: Savings goal created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+        "400":
+          description: Invalid goal name or target
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: A goal with this name already exists or the request key conflicts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Goal could not be saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /goals/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 80
+    patch:
+      operationId: updateSavingsGoal
+      tags: [rewards]
+      summary: Update a savings goal's name or target
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingsGoalUpdate"
+      responses:
+        "200":
+          description: Goal updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+        "400":
+          description: Invalid goal update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Goal not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Goal target is below progress or name is already in use
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Goal could not be updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteSavingsGoal
+      tags: [rewards]
+      summary: Delete a savings goal from the active list
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 80
+      responses:
+        "204":
+          description: Goal deleted
+        "400":
+          description: Invalid session identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Goal not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Goal could not be deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /goals/{id}/contributions:
+    post:
+      operationId: addSavingsGoalContribution
+      tags: [rewards]
+      summary: Record a virtual amount toward a savings goal
+      description: Tracking only; this never moves real money or approves a Future Fund contribution.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 80
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingsGoalContributionInput"
+      responses:
+        "200":
+          description: Idempotent contribution request already recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoalContributionResult"
+        "201":
+          description: Virtual goal progress updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoalContributionResult"
+        "400":
+          description: Invalid contribution amount or request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Goal not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Contribution exceeds the remaining amount or goal changed concurrently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Goal contribution could not be saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    CatalogItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+          enum: [KWD]
+        alternativeName:
+          type: ["string", "null"]
+        alternativePrice:
+          type: ["number", "null"]
+        discountLabel:
+          type: ["string", "null"]
+        promoCode:
+          type: ["string", "null"]
+        cashbackPercent:
+          type: ["number", "null"]
+        expectedUses:
+          type: integer
+          minimum: 1
+        demoData:
+          type: boolean
+      required:
+        - id
+        - name
+        - category
+        - price
+        - currency
+        - alternativeName
+        - alternativePrice
+        - discountLabel
+        - promoCode
+        - cashbackPercent
+        - expectedUses
+        - demoData
+    Decision:
+      type: object
+      properties:
+        id:
+          type: string
+        itemId:
+          type: string
+        itemName:
+          type: string
+        price:
+          type: number
+        decision:
+          type: string
+          enum: [buy, wait_24h, wait_7_days, skip]
+        status:
+          type: string
+          enum: [completed, waiting]
+        waitingPeriod:
+          type: ["string", "null"]
+          enum: [null, "24h", "7d"]
+        waitUntil:
+          type: ["string", "null"]
+          format: date-time
+        savedAmount:
+          type: number
+        preparedContribution:
+          type: number
+        simulatedContributionAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+      required:
+        - id
+        - itemId
+        - itemName
+        - price
+        - decision
+        - status
+        - waitingPeriod
+        - waitUntil
+        - savedAmount
+        - preparedContribution
+        - simulatedContributionAt
+        - createdAt
+        - completedAt
+    DecisionInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 80
+        itemId:
+          type: string
+          minLength: 1
+          maxLength: 80
+        decision:
+          type: string
+          enum: [buy, wait_24h, wait_7_days, skip]
+        contributionPercent:
+          type: integer
+          minimum: 1
+          maximum: 100
+        requestId:
+          type: string
+          format: uuid
+      required: [sessionId, itemId, decision]
+    DecisionCompletionInput:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum: [buy, wait_24h, wait_7_days, skip]
+        contributionPercent:
+          type: integer
+          minimum: 1
+          maximum: 100
+      required: [decision]
+    FutureFundInvestmentInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 80
+        decisionId:
+          type: string
+          minLength: 1
+          maxLength: 80
+        contributionPercent:
+          type: integer
+          minimum: 1
+          maximum: 100
+      required: [sessionId, decisionId]
+    FutureFundContribution:
+      type: object
+      properties:
+        decisionId:
+          type: string
+        itemName:
+          type: string
+        amount:
+          type: number
+        contributedAt:
+          type: string
+          format: date-time
+      required: [decisionId, itemName, amount, contributedAt]
+    FutureFundProjection:
+      type: object
+      properties:
+        years:
+          type: integer
+          enum: [1, 3, 5, 10]
+        projectedValue:
+          type: number
+        projectedGrowth:
+          type: number
+      required: [years, projectedValue, projectedGrowth]
+    FutureFundSummary:
+      type: object
+      properties:
+        simulationOnly:
+          type: boolean
+        annualReturnRate:
+          type: number
+        totalContributed:
+          type: number
+        contributionCount:
+          type: integer
+        contributions:
+          type: array
+          items:
+            $ref: "#/components/schemas/FutureFundContribution"
+        projections:
+          type: array
+          items:
+            $ref: "#/components/schemas/FutureFundProjection"
+      required:
+        - simulationOnly
+        - annualReturnRate
+        - totalContributed
+        - contributionCount
+        - contributions
+        - projections
+    RewardsSummary:
+      type: object
+      properties:
+        pointsBalance:
+          type: integer
+          minimum: 0
+        decisionPoints:
+          type: integer
+          minimum: 0
+        goalBonusPoints:
+          type: integer
+          minimum: 0
+        currentStreak:
+          type: integer
+          minimum: 0
+        longestStreak:
+          type: integer
+          minimum: 0
+        savedToday:
+          type: boolean
+        totalSaved:
+          type: number
+          minimum: 0
+          multipleOf: 0.001
+        skippedPurchases:
+          type: integer
+          minimum: 0
+      required:
+        - pointsBalance
+        - decisionPoints
+        - goalBonusPoints
+        - currentStreak
+        - longestStreak
+        - savedToday
+        - totalSaved
+        - skippedPurchases
+    SavingsGoal:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        targetAmount:
+          type: number
+          minimum: 0.001
+          multipleOf: 0.001
+        currentAmount:
+          type: number
+          minimum: 0
+          multipleOf: 0.001
+        remainingAmount:
+          type: number
+          minimum: 0
+          multipleOf: 0.001
+        percentComplete:
+          type: number
+          minimum: 0
+          maximum: 100
+        isComplete:
+          type: boolean
+        bonusAwarded:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - targetAmount
+        - currentAmount
+        - remainingAmount
+        - percentComplete
+        - isComplete
+        - bonusAwarded
+        - completedAt
+        - createdAt
+        - updatedAt
+    SavingsGoalInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 80
+        requestId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+        targetAmount:
+          type: number
+          minimum: 0.001
+          multipleOf: 0.001
+      required: [sessionId, requestId, name, targetAmount]
+    SavingsGoalUpdate:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 80
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+        targetAmount:
+          type: number
+          minimum: 0.001
+          multipleOf: 0.001
+      required: [sessionId]
+    SavingsGoalContributionInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 8
+          maxLength: 80
+        requestId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          minimum: 0.001
+          multipleOf: 0.001
+      required: [sessionId, requestId, amount]
+    SavingsGoalContributionResult:
+      type: object
+      properties:
+        goal:
+          $ref: "#/components/schemas/SavingsGoal"
+        duplicate:
+          type: boolean
+        completedNow:
+          type: boolean
+        bonusAwardedNow:
+          type: boolean
+      required: [goal, duplicate, completedNow, bonusAwardedNow]
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
